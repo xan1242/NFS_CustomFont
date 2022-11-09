@@ -48,6 +48,10 @@ FONT_NFS_BODY = 0.208334
 
 Replace "FONT_NFS_BODY" with your own name and the scale number with the one you need.
 
+### Note about NFSHDContentSupport
+
+If you are using [NFSHDContentSupport](https://github.com/AeroWidescreen/NFSHDContentSupport), please **disable HDFontSupport** and anything related to it. This is not compatible with that plugin.
+
 # Tools
 
 You may find the tools used to build custom fonts in the "Tools" folder. Open the README there for more information.
