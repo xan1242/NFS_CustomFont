@@ -42,8 +42,6 @@ For Carbon and newer, use the TPKmode 1 instead.
 
 - KrnAdjust - Kern batch adjuster - allows you to easily change the offsets of all glyphs in a .krn file exported from FontWiz - use this if fonts are offset
 
-- 
-
 # Full package
 
 This repository will only contain non-copyrighted code due to legal issues.
