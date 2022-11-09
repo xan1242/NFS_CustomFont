@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32825.248
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NFS_CustomFont", "NFS_CustomFont.vcxproj", "{3C558AD9-5F9C-4A14-8F07-800F46C132C7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug-Carbon|x86 = Debug-Carbon|x86
+		Debug-MW|x86 = Debug-MW|x86
+		Debug-PS|x86 = Debug-PS|x86
+		Debug-UC|x86 = Debug-UC|x86
+		Debug-UG|x86 = Debug-UG|x86
+		Debug-UG2|x86 = Debug-UG2|x86
+		Release-Carbon|x86 = Release-Carbon|x86
+		Release-MW|x86 = Release-MW|x86
+		Release-PS|x86 = Release-PS|x86
+		Release-UC|x86 = Release-UC|x86
+		Release-UG|x86 = Release-UG|x86
+		Release-UG2|x86 = Release-UG2|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3C558AD9-5F9C-4A14-8F07-800F46C132C7}.Debug-Carbon|x86.ActiveCfg = Debug-Carbon|Win32
+		{3C558AD9-5F9C-4A14-8F07-800F46C132C7}.Debug-Carbon|x86.Build.0 = Debug-Carbon|Win32
+		{3C558AD9-5F9C-4A14-8F07-800F46C132C7}.Debug-MW|x86.ActiveCfg = Debug-MW|Win32
+		{3C558AD9-5F9C-4A14-8F07-800F46C132C7}.Debug-MW|x86.Build.0 = Debug-MW|Win32
+		{3C558AD9-5F9C-4A14-8F07-800F46C132C7}.Debug-PS|x86.ActiveCfg = Debug-PS|Win32
+		{3C558AD9-5F9C-4A14-8F07-800F46C132C7}.Debug-PS|x86.Build.0 = Debug-PS|Win32
+		{3C558AD9-5F9C-4A14-8F07-800F46C132C7}.Debug-UC|x86.ActiveCfg = Debug-UC|Win32
+		{3C558AD9-5F9C-4A14-8F07-800F46C132C7}.Debug-UC|x86.Build.0 = Debug-UC|Win32
+		{3C558AD9-5F9C-4A14-8F07-800F46C132C7}.Debug-UG|x86.ActiveCfg = Debug-UG|Win32
+		{3C558AD9-5F9C-4A14-8F07-800F46C132C7}.Debug-UG|x86.Build.0 = Debug-UG|Win32
+		{3C558AD9-5F9C-4A14-8F07-800F46C132C7}.Debug-UG2|x86.ActiveCfg = Debug-UG2|Win32
+		{3C558AD9-5F9C-4A14-8F07-800F46C132C7}.Debug-UG2|x86.Build.0 = Debug-UG2|Win32
+		{3C558AD9-5F9C-4A14-8F07-800F46C132C7}.Release-Carbon|x86.ActiveCfg = Release-Carbon|Win32
+		{3C558AD9-5F9C-4A14-8F07-800F46C132C7}.Release-Carbon|x86.Build.0 = Release-Carbon|Win32
+		{3C558AD9-5F9C-4A14-8F07-800F46C132C7}.Release-MW|x86.ActiveCfg = Release-MW|Win32
+		{3C558AD9-5F9C-4A14-8F07-800F46C132C7}.Release-MW|x86.Build.0 = Release-MW|Win32
+		{3C558AD9-5F9C-4A14-8F07-800F46C132C7}.Release-PS|x86.ActiveCfg = Release-PS|Win32
+		{3C558AD9-5F9C-4A14-8F07-800F46C132C7}.Release-PS|x86.Build.0 = Release-PS|Win32
+		{3C558AD9-5F9C-4A14-8F07-800F46C132C7}.Release-UC|x86.ActiveCfg = Release-UC|Win32
+		{3C558AD9-5F9C-4A14-8F07-800F46C132C7}.Release-UC|x86.Build.0 = Release-UC|Win32
+		{3C558AD9-5F9C-4A14-8F07-800F46C132C7}.Release-UG|x86.ActiveCfg = Release-UG|Win32
+		{3C558AD9-5F9C-4A14-8F07-800F46C132C7}.Release-UG|x86.Build.0 = Release-UG|Win32
+		{3C558AD9-5F9C-4A14-8F07-800F46C132C7}.Release-UG2|x86.ActiveCfg = Release-UG2|Win32
+		{3C558AD9-5F9C-4A14-8F07-800F46C132C7}.Release-UG2|x86.Build.0 = Release-UG2|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D362C571-B748-4AE2-8F30-E44F423A3124}
+	EndGlobalSection
+EndGlobal
