@@ -59,3 +59,5 @@ You may find the tools used to build custom fonts in the "Tools" folder. Open th
 # HD Font Packs
 
 In the "Releases" tab, you may find the "HDFonts" archive for the game of your choice. Simply extract the file to the root of the game directory to install!
+
+NOTE: These only support glyphs for Western Europe regions (codepoints 32 to 255). If you need any different glyphs (e.g. cyrillic), please try creating the font you need yourselves by visiting the "Tools" folder.
