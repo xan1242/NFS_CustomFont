@@ -57,7 +57,7 @@
 #define GETCHARACTERWIDTH_HOOK_ADDR_1 0x0051368A
 #define GETCHARACTERWIDTH_HOOK_ADDR_2 0x00589C53
 
-
+#define GAME_D3D9_DEVICE *(LPDIRECT3DDEVICE9*)0x00982BDC;
 
 void* (__thiscall* FERenderObject_AddPoly)(unsigned int dis, float x0, float y0, float x1, float y1, float z, float s0, float t0, float s1, float t1, unsigned int* colors, int res) = (void* (__thiscall*)(unsigned int, float, float, float, float, float, float, float, float, float, unsigned int*, int))FERENDEROBJECT_ADDPOLY_ADDR;
 void(__thiscall* FEngFont_PrintCharacter)(unsigned int dis, void* pGlyph, float fX, float fY, unsigned int* render_colors, void* cached, void* pPoly) = (void(__thiscall*)(unsigned int, void*, float, float, unsigned int*, void*, void*))FENGFONT_PRINTCHARACTER_ADDR;

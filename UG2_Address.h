@@ -60,6 +60,8 @@
 #define FONT_SCALE_VAL_ADDR_1 0x536FC6
 #define FONT_SCALE_VAL_ADDR_2 0x799360
 
+#define GAME_D3D9_DEVICE *(LPDIRECT3DDEVICE9*)0x00870974;
+
 void(__thiscall* FEngFont_RenderString)(unsigned int dis, void* Color, wchar_t* pcString, void* obj, void* matrix, void* cached, void* PackageRenderInfo) = (void(__thiscall*)(unsigned int, void*, wchar_t*, void*, void*, void*, void*))FENGFONT_RENDERSTRING_ADDR;
 
 float(__thiscall* FEngFont_GetLineWidth)(unsigned int dis, wchar_t* pcString, unsigned int flags, unsigned int maxWidth, bool* word_warp) = (float(__thiscall*)(unsigned int, wchar_t*, unsigned int, unsigned int, bool*))FENGFONT_GETLINEWIDTH_ADDR;
