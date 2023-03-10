@@ -519,7 +519,6 @@ void __stdcall FEngFont_PrintCharacterInWorld_Hook(void* pGlyph, float fX, float
 }
 #endif
 
-
 char feng_font_copy[0x38];
 void* FindFont_Hook(unsigned int hash)
 {
@@ -530,6 +529,18 @@ void* FindFont_Hook(unsigned int hash)
 
 	return feng_font_copy;
 }
+
+#ifdef GAME_PS
+void* FindFont_Hook_2(unsigned int hash)
+{
+	void* font = FindFont(hash);
+	memcpy(feng_font_copy, font, 0x38);
+	float* height = (float*)&(feng_font_copy[FENGFONT_HEIGHT_OFFSET]);
+	*height *= GetFontScalarByHash(hash) * 5.0f;
+
+	return feng_font_copy;
+}
+#endif
 
 void InitConfig()
 {
@@ -724,6 +735,8 @@ int Init()
 	injector::MakeCALL(GETTEXTHEIGHT_HOOK_ADDR_10, FEngFont_GetTextHeight_Hook, true);
 	injector::MakeCALL(GETTEXTHEIGHT_HOOK_ADDR_12, FEngFont_GetTextHeight_Hook_2, true);
 	injector::MakeCALL(GETCHARACTERWIDTH_HOOK_ADDR_1, FEngFont_GetCharacterWidth_Hook, true);
+	//injector::MakeCALL(0x005FEDFD, FindFont_Hook_2, true); // feDialogConfig
+	injector::MakeCALL(0x005FEC4E, FindFont_Hook_2, true); // feDialogConfig
 #endif
 #ifdef GAME_UC
 	injector::MakeCALL(PRINTCHARINWORLD_HOOK_ADDR, FEngFont_PrintCharacterInWorld_Hook, true);
@@ -752,8 +765,8 @@ BOOL APIENTRY DllMain(HMODULE /*hModule*/, DWORD reason, LPVOID /*lpReserved*/)
 {
 	if (reason == DLL_PROCESS_ATTACH)
 	{
-		//freopen("CON", "w", stdout);
-		//freopen("CON", "w", stderr);
+		freopen("CON", "w", stdout);
+		freopen("CON", "w", stderr);
 
 		InitConfig();
 		FixWorkingDirectory();
