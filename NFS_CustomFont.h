@@ -62,7 +62,7 @@ void toupper_char_string(char* in)
 	}
 }
 
-int bStringHash(char* str)
+int bStringHash(const char* str)
 {
 	if (str == NULL)
 		return 0;

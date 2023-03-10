@@ -11,6 +11,7 @@
 #include <strsafe.h>
 #include <math.h>
 #include "NFS_CustomFont.h"
+#include "mini/src/mini/ini.h"
 
 #pragma runtime_checks( "", off )
 
@@ -544,100 +545,23 @@ void* FindFont_Hook_2(unsigned int hash)
 
 void InitConfig()
 {
-	FILE* fin = fopen(FONT_SCALE_SETTINGS_FILENAME, "rb");
-
-	if (!fin)
-		return;
-
-	char line[512];
-	char nlchecker;
-	char* fontname;
-	char* valstr;
-	char* nlp;
-	char* SepPoint;
-	char* SpacePoint;
-	char* CommentPoint;
-	uint32_t linecount = 0;
-
-	// count up lines
-	while (!feof(fin))
-	{
-		nlchecker = fgetc(fin);
-		if (nlchecker == '\n')
-			linecount++;
-	}
-
-	fseek(fin, 0, SEEK_SET);
+	mINI::INIFile inifile("NFS_CustomFont.ini");
+	mINI::INIStructure ini;
+	inifile.read(ini);
 
 	uint32_t defcount = 0;
 
-	for (int i = 0; i < linecount; i++)
+	if (ini.has("FontScale"))
 	{
-		fgets(line, 512, fin);
-
-		// PARSE THE STRING
-		// remove the newline
-		nlp = strchr(line, '\n');
-		if (nlp)
-			*nlp = '\0';
-		nlp = strchr(line, '\r');
-		if (nlp)
-			*nlp = '\0';
-
-		// check for any comments and ignore them
-		CommentPoint = strchr(line, ';');
-		if (CommentPoint)
-			*CommentPoint = '\0';
-		CommentPoint = strchr(line, '#');
-		if (CommentPoint)
-			*CommentPoint = '\0';
-		CommentPoint = strchr(line, '/');
-		if (CommentPoint)
-			*CommentPoint = '\0';
-		CommentPoint = strchr(line, '[');
-		if (CommentPoint)
-			*CommentPoint = '\0';
-		if (line[0] == '\n')
-			line[0] = '\0';
-		if (line[0] == '\r')
-			line[0] = '\0';
-		// check if we commented out the beginning of the line during this process
-		if (strlen(line) > 0)
+		auto const& inisection = ini["FontScale"];
+		for (auto const& it : inisection)
 		{
-			// find the separation token point
-			SepPoint = strchr(line, '=');
-			// check for the last space
-			SpacePoint = strchr(SepPoint, ' ');
-			// assign the value string pointer
-			if (SpacePoint)
-				valstr = SpacePoint + 1;
-			else
-				valstr = SepPoint + 1;
-			// terminate space for value
-			SpacePoint = strchr(valstr, ' ');
-			if (SpacePoint)
-				*SpacePoint = '\0';
-			
-			// terminate for name
-			*SepPoint = '\0';
-
-			// check for spaces from the beginning
-			SpacePoint = strchr(line, ' ');
-			if (SpacePoint)
-				*SpacePoint = '\0';
-			// assign the font name pointer
-			fontname = line;
-
-			// Save values
-			FontHashes[defcount] = bStringHash(fontname);
-			FontScalars[defcount] = atof(valstr);
+			FontHashes[defcount] = bStringHash(it.first.c_str());
+			FontScalars[defcount] = stof(it.second);
 			defcount++;
 		}
 	}
-
 	FontDefineCount = defcount;
-
-	fclose(fin);
 }
 
 int Init()
