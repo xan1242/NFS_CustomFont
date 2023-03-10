@@ -216,6 +216,11 @@ uint32_t FEngFont_GetFontHash(void* FEngFontObj)
 	return *(uint32_t*)((int)FEngFontObj + FENGFONT_HASH_OFFSET);
 }
 
+float FEngFont_GetFontHeight(void* FEngFontObj)
+{
+	return *(float*)((int)FEngFontObj + FENGFONT_HEIGHT_OFFSET);
+}
+
 float GetFontScalarByHash(uint32_t FontHash)
 {
 	uint32_t m = FontScaleMode;
@@ -340,6 +345,24 @@ float __stdcall FEngFont_GetTextHeight_Hook(wchar_t* pcString, int ilLeading, un
 #endif
 
 #if !(defined GAME_MW) && !(defined GAME_UG2) && !(defined GAME_UG)
+#ifdef GAME_PS
+float __stdcall FEngFont_GetTextHeight_Hook_2(wchar_t* pcString, int ilLeading, unsigned int flags, unsigned int maxWidth, bool word_wrap)
+{
+	unsigned int thethis = 0;
+	_asm mov thethis, ecx
+
+	float scalar = GetFontScalarByHash(FEngFont_GetFontHash((void*)thethis));
+	unsigned int newMaxWidth = (unsigned int)((float)maxWidth / scalar * (1 - scalar));
+
+	float retval = FEngFont_GetTextHeight(thethis, pcString, ilLeading, flags, newMaxWidth, word_wrap);
+	float maxheight = FEngFont_GetFontHeight((void*)thethis) * 8.978723404255319f;
+
+	if ((retval) > maxheight)
+		return maxheight;
+
+	return retval;
+}
+#else
 float __stdcall FEngFont_GetTextHeight_Hook_2(wchar_t* pcString, int ilLeading, unsigned int flags, unsigned int maxWidth, bool word_wrap)
 {
 	unsigned int thethis = 0;
@@ -353,6 +376,7 @@ float __stdcall FEngFont_GetTextHeight_Hook_2(wchar_t* pcString, int ilLeading, 
 
 	return retval;
 }
+#endif // GAME_PS
 #endif
 
 static float AddPolyScalar = 1.0f;
@@ -553,7 +577,7 @@ void* FindFont_Hook_2(unsigned int hash)
 	void* font = FindFont(hash);
 	memcpy(feng_font_copy, font, 0x38);
 	float* height = (float*)&(feng_font_copy[FENGFONT_HEIGHT_OFFSET]);
-	*height *= GetFontScalarByHash(hash) * 5.0f;
+	*height *= GetFontScalarByHash(hash);
 
 	return feng_font_copy;
 }
@@ -699,7 +723,7 @@ int Init()
 	injector::MakeCALL(GETTEXTHEIGHT_HOOK_ADDR_12, FEngFont_GetTextHeight_Hook_2, true);
 	injector::MakeCALL(GETCHARACTERWIDTH_HOOK_ADDR_1, FEngFont_GetCharacterWidth_Hook, true);
 	//injector::MakeCALL(0x005FEDFD, FindFont_Hook_2, true); // feDialogConfig
-	injector::MakeCALL(0x005FEC4E, FindFont_Hook_2, true); // feDialogConfig
+	//injector::MakeCALL(0x005FEC4E, FindFont_Hook_2, true); // feDialogConfig
 #endif
 #ifdef GAME_UC
 	injector::MakeCALL(PRINTCHARINWORLD_HOOK_ADDR, FEngFont_PrintCharacterInWorld_Hook, true);
