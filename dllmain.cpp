@@ -765,8 +765,8 @@ BOOL APIENTRY DllMain(HMODULE /*hModule*/, DWORD reason, LPVOID /*lpReserved*/)
 {
 	if (reason == DLL_PROCESS_ATTACH)
 	{
-		freopen("CON", "w", stdout);
-		freopen("CON", "w", stderr);
+		//freopen("CON", "w", stdout);
+		//freopen("CON", "w", stderr);
 
 		InitConfig();
 		FixWorkingDirectory();
