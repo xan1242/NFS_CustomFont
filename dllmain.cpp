@@ -105,9 +105,24 @@ DWORD GetDirectoryListing(const char* FolderPath)
 static injector::hook_back<void(*)()> hb_LoadGlobalAChunks;
 void LoadGlobalAChunks_Hook()
 {
+	// get the appropriate mode per resolution
+	LPDIRECT3DDEVICE9 gDevice = GAME_D3D9_DEVICE;
+	D3DVIEWPORT9 v = { 0 };
+
+	gDevice->GetViewport(&v);
+
+	if (v.Height > 1080)
+		FontScaleMode = 2;
+
+	if (v.Height > 720)
+		FontScaleMode = 1;
+
+	sprintf(LoaderFileName, "%s\\%s", CUSTOM_FONT_FOLDER, PathStrs[FontScaleMode]);
+	GetDirectoryListing(LoaderFileName);
+
 	for (int i = 0; i < FileCount; i++)
 	{
-		sprintf(LoaderFileName, "%s\\%s", CUSTOM_FONT_FOLDER, FileDirectoryListing[i]);
+		sprintf(LoaderFileName, "%s\\%s\\%s", CUSTOM_FONT_FOLDER, PathStrs[FontScaleMode], FileDirectoryListing[i]);
 #ifndef GAME_UC
 		if (bFileExists(LoaderFileName))
 			LoadResourceFile(LoaderFileName, 1, 0, NULL, 0, 0, 0);
@@ -203,10 +218,11 @@ uint32_t FEngFont_GetFontHash(void* FEngFontObj)
 
 float GetFontScalarByHash(uint32_t FontHash)
 {
-	for (int i = 0; i < FontDefineCount; i++)
+	uint32_t m = FontScaleMode;
+	for (int i = 0; i < FontDefineCount[m]; i++)
 	{
-		if (FontHashes[i] == FontHash)
-			return FontScalars[i];
+		if (FontHashes[m][i] == FontHash)
+			return FontScalars[m][i];
 	}
 	return 1.0f;
 }
@@ -549,19 +565,42 @@ void InitConfig()
 	mINI::INIStructure ini;
 	inifile.read(ini);
 
-	uint32_t defcount = 0;
-
-	if (ini.has("FontScale"))
+	if (ini.has("FontScaleLow"))
 	{
-		auto const& inisection = ini["FontScale"];
+		int dc = 0;
+		auto const& inisection = ini["FontScaleLow"];
 		for (auto const& it : inisection)
 		{
-			FontHashes[defcount] = bStringHash(it.first.c_str());
-			FontScalars[defcount] = stof(it.second);
-			defcount++;
+			FontHashes[0][dc] = bStringHash(it.first.c_str());
+			FontScalars[0][dc] = stof(it.second);
+			dc++;
 		}
+		FontDefineCount[0] = dc;
 	}
-	FontDefineCount = defcount;
+	if (ini.has("FontScaleMid"))
+	{
+		int dc = 0;
+		auto const& inisection = ini["FontScaleMid"];
+		for (auto const& it : inisection)
+		{
+			FontHashes[1][dc] = bStringHash(it.first.c_str());
+			FontScalars[1][dc] = stof(it.second);
+			dc++;
+		}
+		FontDefineCount[1] = dc;
+	}
+	if (ini.has("FontScaleHigh"))
+	{
+		int dc = 0;
+		auto const& inisection = ini["FontScaleHigh"];
+		for (auto const& it : inisection)
+		{
+			FontHashes[2][dc] = bStringHash(it.first.c_str());
+			FontScalars[2][dc] = stof(it.second);
+			dc++;
+		}
+		FontDefineCount[2] = dc;
+	}
 }
 
 int Init()
@@ -678,8 +717,6 @@ int Init()
 
 	UnloaderFEngFont = (uint32_t(__cdecl*)(void*)) * (uint32_t*)UNLOADERFENGFONT_VTABLE_ADDR;
 	*(uint32_t*)UNLOADERFENGFONT_VTABLE_ADDR = (uint32_t)&UnloaderFEngFont_Hook;
-
-	GetDirectoryListing(CUSTOM_FONT_FOLDER);
 
 	return 0;
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include "..\includes\injector\injector.hpp"
 #include "..\includes\injector\utility.hpp"
+#include <d3d9.h>
 
 #ifdef GAME_MW
 #include "MW_Address.h"
@@ -27,12 +28,15 @@
 #endif
 
 #define CUSTOM_FONT_FOLDER "CustomFonts"
-#define FONT_SCALE_SETTINGS_FILENAME "NFS_CustomFont.txt"
+#define FONT_SCALE_SETTINGS_FILENAME "NFS_CustomFont.ini"
 #define MAX_FONT_DEFINES 64
+#define MAX_FONT_SCALES 3
 
-float FontScalars[MAX_FONT_DEFINES];
-uint32_t FontHashes[MAX_FONT_DEFINES];
-static uint32_t FontDefineCount;
+float FontScalars[MAX_FONT_SCALES][MAX_FONT_DEFINES];
+uint32_t FontHashes[MAX_FONT_SCALES][MAX_FONT_DEFINES];
+static uint32_t FontDefineCount[MAX_FONT_SCALES];
+static uint32_t FontScaleMode = 0;
+static const char* PathStrs[3] = {"Low", "Mid", "High"};
 
 // file loader list
 char** FileDirectoryListing;
