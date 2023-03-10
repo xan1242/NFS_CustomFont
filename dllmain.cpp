@@ -111,11 +111,11 @@ void LoadGlobalAChunks_Hook()
 
 	gDevice->GetViewport(&v);
 
-	if (v.Height > 1080)
-		FontScaleMode = 2;
-
 	if (v.Height > 720)
 		FontScaleMode = 1;
+
+	if (v.Height > 1080)
+		FontScaleMode = 2;
 
 	sprintf(LoaderFileName, "%s\\%s", CUSTOM_FONT_FOLDER, PathStrs[FontScaleMode]);
 	GetDirectoryListing(LoaderFileName);
