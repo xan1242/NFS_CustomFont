@@ -90,15 +90,6 @@ DWORD GetDirectoryListing(const char* FolderPath, std::vector<FontInfo>* inList)
 
 void SetFontScale(std::vector<FontInfo>* inList, uint32_t hash, float scale)
 {
-	//for (FontInfo i : *inList)
-	//{
-	//	if (i.fontHash == hash)
-	//	{
-	//		i.fontScalar = scale;
-	//		return;
-	//	}
-	//}
-
 	for (int i = 0; i < inList->size(); i++)
 	{
 		if (inList->at(i).fontHash == hash)
@@ -107,7 +98,6 @@ void SetFontScale(std::vector<FontInfo>* inList, uint32_t hash, float scale)
 			return;
 		}
 	}
-
 }
 
 bool bCheckIfInFontList(std::vector<FontInfo>* inList, uint32_t hash)
