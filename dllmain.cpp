@@ -173,7 +173,7 @@ void LoadGlobalAChunks_Hook()
 			break;
 		}
 		fc--;
-	} while (fc > 0);
+	} while (fc >= 0);
 
 	// build a combined list
 	switch (FontScaleMode)
