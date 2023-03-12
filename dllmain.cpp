@@ -655,9 +655,9 @@ void InitConfig()
 	{
 		if (ini["MAIN"].has("FontFolder"))
 			FontFolder = ini["MAIN"]["FontFolder"];
-		if (ini["MAIN"].has("ThresholdLow"))
-			ThresholdMid = stoul(ini["MAIN"]["ThresholdMid"]);
 		if (ini["MAIN"].has("ThresholdMid"))
+			ThresholdMid = stoul(ini["MAIN"]["ThresholdMid"]);
+		if (ini["MAIN"].has("ThresholdHigh"))
 			ThresholdHigh = stoul(ini["MAIN"]["ThresholdHigh"]);
 	}
 }
