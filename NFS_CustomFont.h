@@ -2,6 +2,9 @@
 #include "..\includes\injector\injector.hpp"
 #include "..\includes\injector\utility.hpp"
 #include <d3d9.h>
+#include <vector>
+#include <string>
+using namespace std;
 
 #ifdef GAME_MW
 #include "MW_Address.h"
@@ -32,14 +35,26 @@
 #define MAX_FONT_DEFINES 64
 #define MAX_FONT_SCALES 3
 
-float FontScalars[MAX_FONT_SCALES][MAX_FONT_DEFINES];
-uint32_t FontHashes[MAX_FONT_SCALES][MAX_FONT_DEFINES];
-static uint32_t FontDefineCount[MAX_FONT_SCALES];
+static string FontFolder = CUSTOM_FONT_FOLDER;
+static uint32_t ThresholdMid = 960;
+static uint32_t ThresholdHigh = 1200;
 static uint32_t FontScaleMode = 0;
 static const char* PathStrs[3] = {"Low", "Mid", "High"};
 
+struct FontInfo
+{
+	uint32_t fontHash;
+	float fontScalar;
+	string fontName;
+	string filename;
+};
+
 // file loader list
-char** FileDirectoryListing;
+//char** FileDirectoryListing;
+vector<FontInfo> FontList_Low;
+vector<FontInfo> FontList_Mid;
+vector<FontInfo> FontList_High;
+vector<FontInfo> FontList;
 uint32_t FileCount = 0;
 char LoaderFileName[512];
 
@@ -47,7 +62,7 @@ char LoaderFileName[512];
 void __stdcall LoadResourceFile(char* filename, int ResType, int unk1, void* unk2, void* unk3, int unk4, int unk5);
 #endif
 
-bool bFileExists(char* Filename)
+bool bFileExists(const char* Filename)
 {
 	FILE* fin = fopen(Filename, "rb");
 	if (!fin)

@@ -89,7 +89,7 @@ float(__thiscall* FEngFont_GetNextWordWidth)(unsigned int dis, wchar_t* pcString
 
 void* (__cdecl* FindFont)(unsigned int hash) = (void* (__cdecl*)(unsigned int))FINDFONT_ADDR;
 
-void* (*LoadResourceFile)(char* filename, int ResType, int flags, int mem_category, void* callback, void* callback_param, int file_offset, int file_size) = (void* (*)(char*, int, int, int, void*, void*, int, int))LOADRESFILE_ADDR;
+void* (*LoadResourceFile)(const char* filename, int ResType, int flags, int mem_category, void* callback, void* callback_param, int file_offset, int file_size) = (void* (*)(const char*, int, int, int, void*, void*, int, int))LOADRESFILE_ADDR;
 void ServiceResourceLoading()
 {
 	return;

@@ -12,6 +12,9 @@
 #include <math.h>
 #include "NFS_CustomFont.h"
 #include "mini/src/mini/ini.h"
+#include <vector>
+#include <string>
+using namespace std;
 
 #pragma runtime_checks( "", off )
 
@@ -25,13 +28,13 @@ void FixWorkingDirectory()
 }
 
 #ifndef GAME_UC
-void __stdcall LoadResourceFile(char* filename, int ResType, int unk1, void* unk2, void* unk3, int unk4, int unk5)
+void __stdcall LoadResourceFile(const char* filename, int ResType, int unk1, void* unk2, void* unk3, int unk4, int unk5)
 {
 	ResourceFile_BeginLoading(CreateResourceFile(filename, ResType, unk1, unk4, unk5), unk2, unk3);
 }
 #endif
 
-DWORD GetDirectoryListing(const char* FolderPath)
+DWORD GetDirectoryListing(const char* FolderPath, std::vector<FontInfo>* inList)
 {
 	WIN32_FIND_DATA ffd = { 0 };
 	TCHAR  szDir[MAX_PATH];
@@ -56,12 +59,22 @@ DWORD GetDirectoryListing(const char* FolderPath)
 		return dwError;
 	}
 
-	// count the files up first
 	do
 	{
 		if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
 		{
-			FileCount++;
+			FontInfo fi = { 0 };
+			fi.filename = FolderPath;
+			fi.filename += "\\";
+			fi.filename += ffd.cFileName;
+			char* dot = strrchr(ffd.cFileName, '.');
+			if (dot)
+				*dot = 0;
+			fi.fontName = ffd.cFileName;
+			fi.fontHash = bStringHash(fi.fontName.c_str());
+			fi.fontScalar = 1.0f;
+
+			inList->push_back(fi);
 		}
 	} while (FindNextFile(hFind, &ffd) != 0);
 
@@ -72,34 +85,39 @@ DWORD GetDirectoryListing(const char* FolderPath)
 	}
 	FindClose(hFind);
 
-	// then create a file list in an array, redo the code
-	FileDirectoryListing = (char**)calloc(FileCount, sizeof(char*));
-
-	ffd = { 0 };
-	hFind = FindFirstFile(szDir, &ffd);
-	if (INVALID_HANDLE_VALUE == hFind)
-	{
-		return dwError;
-	}
-
-	do
-	{
-		if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
-		{
-			FileDirectoryListing[NameCounter] = (char*)calloc(strlen(ffd.cFileName) + 1, sizeof(char));
-			strcpy(FileDirectoryListing[NameCounter], ffd.cFileName);
-			NameCounter++;
-		}
-	} while (FindNextFile(hFind, &ffd) != 0);
-
-	dwError = GetLastError();
-	if (dwError != ERROR_NO_MORE_FILES)
-	{
-		//printf("FindFirstFile error\n");
-	}
-
-	FindClose(hFind);
 	return dwError;
+}
+
+void SetFontScale(std::vector<FontInfo>* inList, uint32_t hash, float scale)
+{
+	//for (FontInfo i : *inList)
+	//{
+	//	if (i.fontHash == hash)
+	//	{
+	//		i.fontScalar = scale;
+	//		return;
+	//	}
+	//}
+
+	for (int i = 0; i < inList->size(); i++)
+	{
+		if (inList->at(i).fontHash == hash)
+		{
+			inList->at(i).fontScalar = scale;
+			return;
+		}
+	}
+
+}
+
+bool bCheckIfInFontList(std::vector<FontInfo>* inList, uint32_t hash)
+{
+	for (FontInfo i : *inList)
+	{
+		if (i.fontHash == hash)
+			return true;
+	}
+	return false;
 }
 
 static injector::hook_back<void(*)()> hb_LoadGlobalAChunks;
@@ -111,24 +129,94 @@ void LoadGlobalAChunks_Hook()
 
 	gDevice->GetViewport(&v);
 
-	if (v.Height > 720)
+	if (v.Height > ThresholdMid)
 		FontScaleMode = 1;
 
-	if (v.Height > 1080)
+	if (v.Height > ThresholdHigh)
 		FontScaleMode = 2;
 
-	sprintf(LoaderFileName, "%s\\%s", CUSTOM_FONT_FOLDER, PathStrs[FontScaleMode]);
-	GetDirectoryListing(LoaderFileName);
+	mINI::INIFile inifile("scripts\\NFS_CustomFont.ini");
+	mINI::INIStructure ini;
+	inifile.read(ini);
 
-	for (int i = 0; i < FileCount; i++)
+	int fc = FontScaleMode;
+	do
 	{
-		sprintf(LoaderFileName, "%s\\%s\\%s", CUSTOM_FONT_FOLDER, PathStrs[FontScaleMode], FileDirectoryListing[i]);
+		sprintf(LoaderFileName, "%s\\%s", FontFolder.c_str(), PathStrs[fc]);
+		switch (fc)
+		{
+		case 2:
+			GetDirectoryListing(LoaderFileName, &FontList_High);
+			if (ini.has("FontScaleHigh"))
+			{
+				auto const& inisection = ini["FontScaleHigh"];
+				for (auto const& it : inisection)
+				{
+					uint32_t hash = bStringHash(it.first.c_str());
+					SetFontScale(&FontList_High, hash, stof(it.second));
+				}
+			}
+			break;
+		case 1:
+			GetDirectoryListing(LoaderFileName, &FontList_Mid);
+			if (ini.has("FontScaleMid"))
+			{
+				auto const& inisection = ini["FontScaleMid"];
+				for (auto const& it : inisection)
+				{
+					uint32_t hash = bStringHash(it.first.c_str());
+					SetFontScale(&FontList_Mid, hash, stof(it.second));
+				}
+			}
+			break;
+		default:
+			GetDirectoryListing(LoaderFileName, &FontList_Low);
+			if (ini.has("FontScaleLow"))
+			{
+				auto const& inisection = ini["FontScaleLow"];
+				for (auto const& it : inisection)
+				{
+					uint32_t hash = bStringHash(it.first.c_str());
+					SetFontScale(&FontList_Low, hash, stof(it.second));
+				}
+			}
+			break;
+		}
+		fc--;
+	} while (fc > 0);
+
+	// build a combined list
+	switch (FontScaleMode)
+	{
+	case 2:
+		for (FontInfo i : FontList_High)
+		{
+			if (!bCheckIfInFontList(&FontList, i.fontHash))
+				FontList.push_back(i);
+		}
+	case 1:
+		for (FontInfo i : FontList_Mid)
+		{
+			if (!bCheckIfInFontList(&FontList, i.fontHash))
+				FontList.push_back(i);
+		}
+	default:
+		for (FontInfo i : FontList_Low)
+		{
+			if (!bCheckIfInFontList(&FontList, i.fontHash))
+				FontList.push_back(i);
+		}
+		break;
+	}
+
+	for (FontInfo i : FontList)
+	{
 #ifndef GAME_UC
-		if (bFileExists(LoaderFileName))
-			LoadResourceFile(LoaderFileName, 1, 0, NULL, 0, 0, 0);
+		if (bFileExists(i.filename.c_str()))
+			LoadResourceFile(i.filename.c_str(), 1, 0, NULL, 0, 0, 0);
 #else
-		if (bFileExists(LoaderFileName))
-			LoadResourceFile(LoaderFileName, 1, 0, *(int*)FECATEGORY_ADDR, NULL, 0, 0, 0);
+		if (bFileExists(i.filename.c_str()))
+			LoadResourceFile(i.filename.c_str(), 1, 0, *(int*)FECATEGORY_ADDR, NULL, 0, 0, 0);
 #endif
 	}
 	ServiceResourceLoading();
@@ -136,7 +224,6 @@ void LoadGlobalAChunks_Hook()
 }
 
 char fntcheck[32];
-char fntcheck2[32];
 uint32_t (__cdecl* LoaderFEngFont)(void* bChunk) = (uint32_t(__cdecl*)(void*))LOADERFENGFONT_ADDR;
 uint32_t __cdecl LoaderFEngFont_Hook(void* bChunk)
 {
@@ -146,20 +233,13 @@ uint32_t __cdecl LoaderFEngFont_Hook(void* bChunk)
 	char* fontname = (char*)((uint32_t)bChunk + 8);
 	char* extpoint = NULL;
 
-	strcpy(fntcheck2, fontname);
-	toupper_char_string(fntcheck2);
+	strcpy_s(fntcheck, fontname);
 
 	// check if we are overriding the font via an external file and if we are, stop it from loading
-	for (int i = 0; i < FileCount; i++)
+	for (FontInfo i : FontList)
 	{
-		// get the filename from the directory list and truncate it
-		strcpy(fntcheck, FileDirectoryListing[i]);
-		extpoint = strrchr(fntcheck, '.');
-		if (extpoint)
-			*extpoint = '\0';
-		toupper_char_string(fntcheck);
 		// compare the filename to the font name
-		if (strcmp(fntcheck, fntcheck2) == 0)
+		if (_stricmp(i.fontName.c_str(), fntcheck) == 0)
 		{
 			// if there is a match, check if the file in memory that we're trying to load is actually a file from the stock game
 			// we check this by checking if there's data beyond the termination point of the font name
@@ -183,20 +263,13 @@ uint32_t __cdecl UnloaderFEngFont_Hook(void* bChunk)
 	char* fontname = (char*)((uint32_t)bChunk + 8);
 	char* extpoint = NULL;
 
-	strcpy(fntcheck2, fontname);
-	toupper_char_string(fntcheck2);
+	strcpy_s(fntcheck, fontname);
 
 	// check if we are overriding the font via an external file and if we are, stop it from unloading
-	for (int i = 0; i < FileCount; i++)
+	for (FontInfo i : FontList)
 	{
-		// get the filename from the directory list and truncate it
-		strcpy(fntcheck, FileDirectoryListing[i]);
-		extpoint = strrchr(fntcheck, '.');
-		if (extpoint)
-			*extpoint = '\0';
-		toupper_char_string(fntcheck);
 		// compare the filename to the font name
-		if (strcmp(fntcheck, fntcheck2) == 0)
+		if (_stricmp(i.fontName.c_str(), fntcheck) == 0)
 		{
 			// if there is a match, check if the file in memory that we're trying to unload is actually a file from the stock game
 			// we check this by checking if there's data beyond the termination point of the font name
@@ -223,11 +296,10 @@ float FEngFont_GetFontHeight(void* FEngFontObj)
 
 float GetFontScalarByHash(uint32_t FontHash)
 {
-	uint32_t m = FontScaleMode;
-	for (int i = 0; i < FontDefineCount[m]; i++)
+	for (FontInfo i : FontList)
 	{
-		if (FontHashes[m][i] == FontHash)
-			return FontScalars[m][i];
+		if (i.fontHash == FontHash)
+			return i.fontScalar;
 	}
 	return 1.0f;
 }
@@ -589,41 +661,14 @@ void InitConfig()
 	mINI::INIStructure ini;
 	inifile.read(ini);
 
-	if (ini.has("FontScaleLow"))
+	if (ini.has("MAIN"))
 	{
-		int dc = 0;
-		auto const& inisection = ini["FontScaleLow"];
-		for (auto const& it : inisection)
-		{
-			FontHashes[0][dc] = bStringHash(it.first.c_str());
-			FontScalars[0][dc] = stof(it.second);
-			dc++;
-		}
-		FontDefineCount[0] = dc;
-	}
-	if (ini.has("FontScaleMid"))
-	{
-		int dc = 0;
-		auto const& inisection = ini["FontScaleMid"];
-		for (auto const& it : inisection)
-		{
-			FontHashes[1][dc] = bStringHash(it.first.c_str());
-			FontScalars[1][dc] = stof(it.second);
-			dc++;
-		}
-		FontDefineCount[1] = dc;
-	}
-	if (ini.has("FontScaleHigh"))
-	{
-		int dc = 0;
-		auto const& inisection = ini["FontScaleHigh"];
-		for (auto const& it : inisection)
-		{
-			FontHashes[2][dc] = bStringHash(it.first.c_str());
-			FontScalars[2][dc] = stof(it.second);
-			dc++;
-		}
-		FontDefineCount[2] = dc;
+		if (ini["MAIN"].has("FontFolder"))
+			FontFolder = ini["MAIN"]["FontFolder"];
+		if (ini["MAIN"].has("ThresholdLow"))
+			ThresholdMid = stoul(ini["MAIN"]["ThresholdMid"]);
+		if (ini["MAIN"].has("ThresholdMid"))
+			ThresholdHigh = stoul(ini["MAIN"]["ThresholdHigh"]);
 	}
 }
 
@@ -745,7 +790,6 @@ int Init()
 	return 0;
 }
 
-
 BOOL APIENTRY DllMain(HMODULE /*hModule*/, DWORD reason, LPVOID /*lpReserved*/)
 {
 	if (reason == DLL_PROCESS_ATTACH)
@@ -753,7 +797,6 @@ BOOL APIENTRY DllMain(HMODULE /*hModule*/, DWORD reason, LPVOID /*lpReserved*/)
 		//freopen("CON", "w", stdout);
 		//freopen("CON", "w", stderr);
 
-		InitConfig();
 		FixWorkingDirectory();
 		Init();
 	}

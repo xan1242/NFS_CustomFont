@@ -1,4 +1,0 @@
-# Font Scale definition file
-# Format: FontName = ScaleFactor, example: FONT_MW_BODY = 0.20834
-# Inlined are calculated ratios in points (source / destination)
-# Valid comment chars are (within quotes): '#' ';' '/' '['

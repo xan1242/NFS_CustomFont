@@ -476,7 +476,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="NFS_CustomFont.txt" />
+    <None Include="NFS_CustomFont.ini" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

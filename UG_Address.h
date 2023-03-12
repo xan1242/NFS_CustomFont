@@ -53,7 +53,7 @@ float(__stdcall* FEngFont_GetTextHeight_Func)(unsigned int dis, wchar_t* pcStrin
 
 //void* (__cdecl* FindFont)(unsigned int hash) = (void* (__cdecl*)(unsigned int))FINDFONT_ADDR;
 
-void* (*CreateResourceFile)(char* filename, int ResFileType, int unk1, int unk2, int unk3) = (void* (*)(char*, int, int, int, int))CREATERESOURCEFILE_ADDR;
+void* (*CreateResourceFile)(const char* filename, int ResFileType, int unk1, int unk2, int unk3) = (void* (*)(const char*, int, int, int, int))CREATERESOURCEFILE_ADDR;
 void(*ServiceResourceLoading)() = (void(*)())SERVICERESOURCELOADING_ADDR;
 
 // Underground 1 special - FUNCTION WRAPPING
