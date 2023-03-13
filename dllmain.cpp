@@ -113,6 +113,7 @@ bool bCheckIfInFontList(std::vector<FontInfo>* inList, uint32_t hash)
 static injector::hook_back<void(*)()> hb_LoadGlobalAChunks;
 void LoadGlobalAChunks_Hook()
 {
+#ifndef GAME_MW
 	// get the appropriate mode per resolution
 	LPDIRECT3DDEVICE9 gDevice = GAME_D3D9_DEVICE;
 	D3DVIEWPORT9 v = { 0 };
@@ -124,7 +125,17 @@ void LoadGlobalAChunks_Hook()
 
 	if (v.Height > ThresholdHigh)
 		FontScaleMode = 2;
+#else
+	uint32_t ScreenWidth = 0;
+	uint32_t ScreenHeight = 0;
 
+	GetCurrentRes(&ScreenWidth, &ScreenHeight);
+	if (ScreenHeight > ThresholdMid)
+		FontScaleMode = 1;
+
+	if (ScreenHeight > ThresholdHigh)
+		FontScaleMode = 2;
+#endif
 	mINI::INIFile inifile("scripts\\NFS_CustomFont.ini");
 	mINI::INIStructure ini;
 	inifile.read(ini);
