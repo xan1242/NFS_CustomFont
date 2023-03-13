@@ -797,7 +797,7 @@ BOOL APIENTRY DllMain(HMODULE /*hModule*/, DWORD reason, LPVOID /*lpReserved*/)
 	{
 		//freopen("CON", "w", stdout);
 		//freopen("CON", "w", stderr);
-
+		InitConfig();
 		FixWorkingDirectory();
 		Init();
 	}
