@@ -73,3 +73,4 @@ void* (__cdecl* FindFont)(unsigned int hash) = (void* (__cdecl*)(unsigned int))F
 void* (*CreateResourceFile)(const char* filename, int ResFileType, int unk1, int unk2, int unk3) = (void* (*)(const char*, int, int, int, int))CREATERESOURCEFILE_ADDR;
 void(__thiscall* ResourceFile_BeginLoading)(void* ResourceFile, void* callback, void* unk) = (void(__thiscall*)(void*, void*, void*))RESFILE_BEGINLOADING_ADDR;
 void(*ServiceResourceLoading)() = (void(*)())SERVICERESOURCELOADING_ADDR;
+void(__cdecl* GetCurrentRes)(unsigned int* OutWidth, unsigned int* OutHeight) = (void(__cdecl*)(unsigned int*, unsigned int*))0x005BF610;

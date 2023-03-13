@@ -113,7 +113,7 @@ bool bCheckIfInFontList(std::vector<FontInfo>* inList, uint32_t hash)
 static injector::hook_back<void(*)()> hb_LoadGlobalAChunks;
 void LoadGlobalAChunks_Hook()
 {
-#ifndef GAME_MW
+#if !(defined (GAME_MW) || defined (GAME_UG2))
 	// get the appropriate mode per resolution
 	LPDIRECT3DDEVICE9 gDevice = GAME_D3D9_DEVICE;
 	D3DVIEWPORT9 v = { 0 };
