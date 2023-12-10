@@ -6,7 +6,8 @@
 #include <d3d9.h>
 #include <vector>
 #include <string>
-using namespace std;
+#include <filesystem>
+//using namespace std;
 
 #ifdef GAME_MW
 #include "MW_Address.h"
@@ -37,28 +38,28 @@ using namespace std;
 #define MAX_FONT_DEFINES 64
 #define MAX_FONT_SCALES 3
 
-static string FontFolder = CUSTOM_FONT_FOLDER;
+static std::filesystem::path FontFolder = CUSTOM_FONT_FOLDER;
 static uint32_t ThresholdMid = 960;
 static uint32_t ThresholdHigh = 1200;
 static uint32_t FontScaleMode = 0;
-static const char* PathStrs[3] = {"Low", "Mid", "High"};
+//static const char* PathStrs[3] = {"Low", "Mid", "High"};
 
 struct FontInfo
 {
 	uint32_t fontHash;
 	float fontScalar;
-	string fontName;
-	string filename;
+	std::string fontName;
+	std::filesystem::path filename;
 };
 
 // file loader list
 //char** FileDirectoryListing;
-vector<FontInfo> FontList_Low;
-vector<FontInfo> FontList_Mid;
-vector<FontInfo> FontList_High;
-vector<FontInfo> FontList;
+std::vector<FontInfo> FontList_Low;
+std::vector<FontInfo> FontList_Mid;
+std::vector<FontInfo> FontList_High;
+std::vector<FontInfo> FontList;
 uint32_t FileCount = 0;
-char LoaderFileName[512];
+//char LoaderFileName[512];
 
 #ifndef GAME_UC
 void __stdcall LoadResourceFile(char* filename, int ResType, int unk1, void* unk2, void* unk3, int unk4, int unk5);
@@ -73,15 +74,15 @@ bool bFileExists(const char* Filename)
 	return true;
 }
 
-void toupper_char_string(char* in)
-{
-	char* s = in;
-	while (*s)
-	{
-		*s = toupper((unsigned char)*s);
-		s++;
-	}
-}
+//void toupper_char_string(char* in)
+//{
+//	char* s = in;
+//	while (*s)
+//	{
+//		*s = toupper((unsigned char)*s);
+//		s++;
+//	}
+//}
 
 int bStringHash(const char* str)
 {

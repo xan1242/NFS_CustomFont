@@ -5,14 +5,15 @@
 // Undercover: works, only on HUD which is using FEng. Apt is used for the rest of UI
 // Underground & Underground 2: Fully working, FMV subtitles need checking
 
-#include <stdlib.h>
-#include <strsafe.h>
-#include <math.h>
+//#include <stdlib.h>
+//#include <strsafe.h>
+//#include <math.h>
 #include "NFS_CustomFont.h"
 #include "mini/src/mini/ini.h"
 #include <vector>
 #include <string>
-using namespace std;
+#include <filesystem>
+//using namespace std;
 
 #pragma runtime_checks( "", off )
 
@@ -32,58 +33,30 @@ void __stdcall LoadResourceFile(const char* filename, int ResType, int unk1, voi
 }
 #endif
 
-DWORD GetDirectoryListing(const char* FolderPath, std::vector<FontInfo>* inList)
+void GetDirectoryListing(std::filesystem::path directoryPath, std::vector<FontInfo>* inList)
 {
-	WIN32_FIND_DATA ffd = { 0 };
-	TCHAR  szDir[MAX_PATH];
-	HANDLE hFind = INVALID_HANDLE_VALUE;
-	DWORD dwError = 0;
-	unsigned int NameCounter = 0;
-
-	StringCchCopy(szDir, MAX_PATH, FolderPath);
-	StringCchCat(szDir, MAX_PATH, TEXT("\\*"));
-
-	if (strlen(FolderPath) > (MAX_PATH - 3))
+	try 
 	{
-		//_tprintf(TEXT("Directory path is too long.\n"));
-		return -1;
-	}
-
-	hFind = FindFirstFile(szDir, &ffd);
-
-	if (INVALID_HANDLE_VALUE == hFind)
-	{
-		//printf("FindFirstFile error\n");
-		return dwError;
-	}
-
-	do
-	{
-		if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+		// Iterate through the directory
+		for (const auto& entry : std::filesystem::directory_iterator(directoryPath)) 
 		{
-			FontInfo fi = { 0 };
-			fi.filename = FolderPath;
-			fi.filename += "\\";
-			fi.filename += ffd.cFileName;
-			char* dot = strrchr(ffd.cFileName, '.');
-			if (dot)
-				*dot = 0;
-			fi.fontName = ffd.cFileName;
-			fi.fontHash = bStringHash(fi.fontName.c_str());
-			fi.fontScalar = 1.0f;
-
-			inList->push_back(fi);
+			// Check if the entry is a regular file
+			if (std::filesystem::is_regular_file(entry.path())) 
+			{
+				FontInfo fi = { 0 };
+				fi.filename = entry.path();
+				fi.fontName = entry.path().stem().string();
+				fi.fontHash = bStringHash(fi.fontName.c_str());
+				fi.fontScalar = 1.0f;
+				
+				inList->push_back(fi);
+			}
 		}
-	} while (FindNextFile(hFind, &ffd) != 0);
-
-	dwError = GetLastError();
-	if (dwError != ERROR_NO_MORE_FILES)
-	{
-		//printf("FindFirstFile error\n");
 	}
-	FindClose(hFind);
-
-	return dwError;
+	catch (const  std::filesystem::filesystem_error& ex) 
+	{
+		return;
+	}
 }
 
 void SetFontScale(std::vector<FontInfo>* inList, uint32_t hash, float scale)
@@ -141,11 +114,12 @@ void LoadGlobalAChunks_Hook()
 	int fc = FontScaleMode;
 	do
 	{
-		sprintf(LoaderFileName, "%s\\%s", FontFolder.c_str(), PathStrs[fc]);
+
+		//sprintf(LoaderFileName, "%s\\%s", FontFolder.c_str(), PathStrs[fc]);
 		switch (fc)
 		{
 		case 2:
-			GetDirectoryListing(LoaderFileName, &FontList_High);
+			GetDirectoryListing(FontFolder / "High", &FontList_High);
 			if (ini.has("FontScaleHigh"))
 			{
 				auto const& inisection = ini["FontScaleHigh"];
@@ -157,7 +131,7 @@ void LoadGlobalAChunks_Hook()
 			}
 			break;
 		case 1:
-			GetDirectoryListing(LoaderFileName, &FontList_Mid);
+			GetDirectoryListing(FontFolder / "Mid", &FontList_Mid);
 			if (ini.has("FontScaleMid"))
 			{
 				auto const& inisection = ini["FontScaleMid"];
@@ -169,7 +143,7 @@ void LoadGlobalAChunks_Hook()
 			}
 			break;
 		default:
-			GetDirectoryListing(LoaderFileName, &FontList_Low);
+			GetDirectoryListing(FontFolder / "Low", &FontList_Low);
 			if (ini.has("FontScaleLow"))
 			{
 				auto const& inisection = ini["FontScaleLow"];
@@ -211,11 +185,11 @@ void LoadGlobalAChunks_Hook()
 	for (FontInfo i : FontList)
 	{
 #ifndef GAME_UC
-		if (bFileExists(i.filename.c_str()))
-			LoadResourceFile(i.filename.c_str(), 1, 0, NULL, 0, 0, 0);
+		if (std::filesystem::exists(i.filename))
+			LoadResourceFile(i.filename.string().c_str(), 1, 0, NULL, 0, 0, 0);
 #else
-		if (bFileExists(i.filename.c_str()))
-			LoadResourceFile(i.filename.c_str(), 1, 0, *(int*)FECATEGORY_ADDR, NULL, 0, 0, 0);
+		if (std::filesystem::exists(i.filename))
+			LoadResourceFile(i.filename.string().c_str(), 1, 0, *(int*)FECATEGORY_ADDR, NULL, 0, 0, 0);
 #endif
 	}
 	ServiceResourceLoading();
@@ -230,7 +204,7 @@ uint32_t __cdecl LoaderFEngFont_Hook(void* bChunk)
 		return 0;
 
 	char* fontname = (char*)((uint32_t)bChunk + 8);
-	char* extpoint = NULL;
+	//char* extpoint = NULL;
 
 	strcpy_s(fntcheck, fontname);
 
@@ -260,7 +234,7 @@ uint32_t __cdecl UnloaderFEngFont_Hook(void* bChunk)
 		return 0;
 
 	char* fontname = (char*)((uint32_t)bChunk + 8);
-	char* extpoint = NULL;
+	//char* extpoint = NULL;
 
 	strcpy_s(fntcheck, fontname);
 
@@ -555,7 +529,7 @@ void __stdcall FEngFont_RenderString_Hook(void* Color, wchar_t* pcString, void* 
 	uint32_t thethis;
 	_asm mov thethis, ecx
 
-	float scalar = GetFontScalarByHash(FEngFont_GetFontHash((void*)thethis));
+	//float scalar = GetFontScalarByHash(FEngFont_GetFontHash((void*)thethis));
 
 	memcpy(&feng_str_copy, obj, 0x78);
 
