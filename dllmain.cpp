@@ -5,15 +5,11 @@
 // Undercover: works, only on HUD which is using FEng. Apt is used for the rest of UI
 // Underground & Underground 2: Fully working, FMV subtitles need checking
 
-//#include <stdlib.h>
-//#include <strsafe.h>
-//#include <math.h>
 #include "NFS_CustomFont.h"
 #include "mini/src/mini/ini.h"
 #include <vector>
 #include <string>
 #include <filesystem>
-//using namespace std;
 
 #pragma runtime_checks( "", off )
 
