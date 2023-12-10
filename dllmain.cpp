@@ -5,8 +5,6 @@
 // Undercover: works, only on HUD which is using FEng. Apt is used for the rest of UI
 // Underground & Underground 2: Fully working, FMV subtitles need checking
 
-#include "stdafx.h"
-#include "stdio.h"
 #include <stdlib.h>
 #include <strsafe.h>
 #include <math.h>
